@@ -97,7 +97,7 @@
     }
     .logo-mark svg { width: 14px; height: 14px; }
 
-    .topbar-nav { display: flex; gap: .15rem; margin-left: 2.5rem; }
+    .topbar-nav { display: flex; gap: .15rem; margin-left: auto; }
     .topbar-nav a {
       color: var(--ink-2); text-decoration: none;
       font-size: .85rem; font-weight: 500;
@@ -714,6 +714,233 @@
       letter-spacing: 0;
     }
 
+    /* ── LIGHTBOX / GALLERY ───────────────────────────────── */
+    .lightbox {
+      position: fixed; inset: 0; z-index: 100;
+      display: none;
+      align-items: stretch; justify-content: stretch;
+    }
+    .lightbox[aria-hidden="false"] { display: flex; }
+    .lightbox-backdrop {
+      position: absolute; inset: 0;
+      background: rgba(14,14,10,0.92);
+      backdrop-filter: blur(18px) saturate(140%);
+      -webkit-backdrop-filter: blur(18px) saturate(140%);
+      animation: lbFade .35s var(--ease);
+    }
+    .lightbox-shell {
+      position: relative;
+      margin: auto;
+      width: min(1280px, 96vw);
+      height: min(900px, 94vh);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      padding: 1.5rem 1.5rem 1.5rem;
+      color: var(--paper);
+      animation: lbRise .4s var(--ease);
+      gap: 1.1rem;
+    }
+    @keyframes lbFade { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes lbRise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+    .lightbox-head {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      gap: 2rem; flex-wrap: wrap;
+    }
+    .lightbox-head .eyebrow { color: var(--ink-4); margin-bottom: .55rem; }
+    .lightbox-head .eyebrow::before { background: var(--ink-4); }
+    .lightbox-title {
+      font-size: clamp(1.4rem, 2.4vw, 2rem);
+      font-weight: 500; letter-spacing: -.03em;
+      color: var(--paper); line-height: 1.1;
+    }
+    .lightbox-title em { font-family: var(--font-serif); font-style: italic; font-weight: 400; }
+    .lightbox-meta {
+      display: inline-flex; align-items: center; gap: .85rem;
+    }
+    .lightbox-count {
+      font-family: var(--font-mono);
+      font-size: .8rem; color: var(--ink-4);
+      letter-spacing: 0; font-weight: 500;
+      font-feature-settings: 'tnum' on;
+    }
+    .lightbox-icon-btn {
+      width: 42px; height: 42px; border-radius: 50%;
+      background: rgba(245,239,229,0.06);
+      border: 1px solid rgba(245,239,229,0.18);
+      color: var(--paper);
+      cursor: pointer;
+      display: grid; place-items: center;
+      transition: background .18s var(--ease), border-color .18s var(--ease), transform .15s var(--ease);
+    }
+    .lightbox-icon-btn:hover { background: rgba(245,239,229,0.14); border-color: rgba(245,239,229,0.32); }
+    .lightbox-icon-btn svg { width: 14px; height: 14px; }
+
+    .lightbox-stage {
+      position: relative;
+      display: flex; align-items: center; justify-content: center;
+      min-height: 0;
+      overflow: hidden;
+      border-radius: var(--radius-xl);
+      background: rgba(245,239,229,0.03);
+    }
+    .lightbox-stage img {
+      max-width: 100%; max-height: 100%;
+      object-fit: contain;
+      border-radius: var(--radius-xl);
+      animation: imgFade .35s var(--ease);
+    }
+    @keyframes imgFade { from { opacity: .2; } to { opacity: 1; } }
+
+    .lightbox-stage.empty {
+      flex-direction: column; gap: 1rem;
+      color: var(--ink-5);
+      border: 1px dashed rgba(245,239,229,0.18);
+    }
+    .lightbox-stage.empty .placeholder-icon {
+      width: 52px; height: 52px; border-radius: 50%;
+      background: rgba(245,239,229,0.05);
+      display: grid; place-items: center;
+      color: var(--ink-4);
+    }
+    .lightbox-stage.empty p {
+      font-size: .92rem; max-width: 32ch; text-align: center;
+      color: var(--ink-5); line-height: 1.5;
+    }
+
+    .lightbox-nav {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      width: 48px; height: 48px; border-radius: 50%;
+      background: rgba(14,14,10,0.55);
+      border: 1px solid rgba(245,239,229,0.22);
+      color: var(--paper);
+      cursor: pointer;
+      display: grid; place-items: center;
+      transition: background .18s var(--ease), transform .18s var(--ease);
+      backdrop-filter: blur(8px);
+      z-index: 2;
+    }
+    .lightbox-nav:hover { background: rgba(14,14,10,0.85); }
+    .lightbox-nav.prev { left: 1rem; }
+    .lightbox-nav.next { right: 1rem; }
+    .lightbox-nav.prev:hover { transform: translateY(-50%) translateX(-2px); }
+    .lightbox-nav.next:hover { transform: translateY(-50%) translateX(2px); }
+    .lightbox-nav svg { width: 16px; height: 16px; }
+
+    .lightbox-thumbs {
+      display: flex; gap: 8px;
+      overflow-x: auto; overflow-y: hidden;
+      padding: 4px 2px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(245,239,229,0.2) transparent;
+    }
+    .lightbox-thumbs::-webkit-scrollbar { height: 6px; }
+    .lightbox-thumbs::-webkit-scrollbar-thumb { background: rgba(245,239,229,0.2); border-radius: 3px; }
+    .lightbox-thumb {
+      flex-shrink: 0;
+      width: 92px; height: 64px;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      cursor: pointer;
+      background: rgba(245,239,229,0.04);
+      border: 2px solid transparent;
+      transition: border-color .18s var(--ease), opacity .18s var(--ease), transform .15s var(--ease);
+      padding: 0; position: relative;
+      opacity: .55;
+    }
+    .lightbox-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .lightbox-thumb:hover { opacity: 1; }
+    .lightbox-thumb.active { opacity: 1; border-color: var(--paper); }
+
+    body.lb-open { overflow: hidden; }
+
+    @media (max-width: 640px) {
+      .lightbox-shell { padding: 1rem; height: 100vh; }
+      .lightbox-nav { width: 38px; height: 38px; }
+      .lightbox-nav.prev { left: .5rem; }
+      .lightbox-nav.next { right: .5rem; }
+      .lightbox-thumb { width: 70px; height: 50px; }
+    }
+
+    /* ── CTA ROW (stacked: View space on top, primary CTA below) ── */
+    .plan-cta-row {
+      display: flex; flex-direction: column;
+      gap: .5rem;
+      margin-top: auto;
+    }
+    .plan-cta-row .plan-cta {
+      width: 100%;
+      padding: .85rem 1rem .85rem 1.25rem;
+      font-size: .84rem;
+    }
+
+    /* Secondary "View space" CTA — ghost variant of the primary CTA */
+    .plan-cta-secondary {
+      background: transparent;
+      color: var(--ink);
+      border: 1px solid var(--line-2);
+    }
+    .plan-cta-secondary .btn-arrow {
+      background: var(--ink);
+      color: var(--ink);
+    }
+    .plan-cta-secondary .btn-arrow svg { color: var(--paper); }
+    .plan-cta-secondary:hover {
+      background: rgba(20,20,14,0.05);
+      border-color: var(--ink);
+    }
+
+    /* Highlight + Featured variants of the secondary CTA */
+    .plan-card.highlight .plan-cta-secondary {
+      background: transparent;
+      color: var(--ink);
+      border-color: var(--line-2);
+    }
+    .plan-card.highlight .plan-cta-secondary .btn-arrow { background: var(--ink); color: var(--ink); }
+    .plan-card.highlight .plan-cta-secondary .btn-arrow svg { color: var(--paper); }
+    .plan-card.highlight .plan-cta-secondary:hover {
+      background: rgba(20,20,14,0.05);
+      border-color: var(--ink);
+    }
+
+    .plan-card.featured .plan-cta-secondary {
+      background: transparent;
+      color: var(--paper);
+      border-color: rgba(245,239,229,0.24);
+    }
+    .plan-card.featured .plan-cta-secondary .btn-arrow {
+      background: var(--paper); color: var(--paper);
+    }
+    .plan-card.featured .plan-cta-secondary .btn-arrow svg { color: var(--ink); }
+    .plan-card.featured .plan-cta-secondary:hover {
+      background: rgba(245,239,229,0.08);
+      border-color: var(--paper);
+    }
+
+    /* Disabled "Photos coming soon" state */
+    .plan-cta[disabled] {
+      background: transparent;
+      color: var(--ink-3);
+      border: 1px dashed var(--line-2);
+      cursor: not-allowed;
+      opacity: 1;
+    }
+    .plan-cta[disabled] .btn-arrow {
+      background: transparent;
+      border: 1px dashed var(--line-2);
+    }
+    .plan-cta[disabled] .btn-arrow svg { color: var(--ink-3); }
+    .plan-cta[disabled]:hover { background: transparent; border-color: var(--line-2); }
+    .plan-card.featured .plan-cta[disabled] {
+      color: var(--ink-5);
+      border-color: rgba(245,239,229,0.16);
+    }
+    .plan-card.featured .plan-cta[disabled] .btn-arrow {
+      background: transparent;
+      border: 1px dashed rgba(245,239,229,0.16);
+    }
+    .plan-card.featured .plan-cta[disabled] .btn-arrow svg { color: var(--ink-5); }
+
     /* ── SKELETON ─────────────────────────────────────────── */
     .skeleton {
       height: 12px; border-radius: 4px;
@@ -805,24 +1032,13 @@
 
 <!-- topbar -->
 <header class="topbar">
-  <span class="logo">
-    <span class="logo-mark">
-      <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M2 11V3l5-1.5L12 3v8L7 12.5 2 11Zm0-8 5 1.5m0 0L12 3M7 4.5v8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </span>
-    Evergreen House
-  </span>
+  <span class="logo">Evergreen House</span>
   <nav class="topbar-nav">
     <a href="#spaces">Spaces</a>
-    <a href="#compare">Compare</a>
+    <a href="#compare" id="nav-compare">Compare</a>
     <a href="#faq">FAQ</a>
     <a href="#contact">Contact</a>
   </nav>
-  <div class="status-pill">
-    <div class="dot loading" id="dot"></div>
-    <span id="status-text">Loading…</span>
-  </div>
 </header>
 
 <!-- HERO -->
@@ -845,7 +1061,7 @@
     <div class="hero-meta">
       <div class="hero-meta-item">
         <span class="hero-meta-num">3 <em>spaces</em></span>
-        <span class="hero-meta-label">Across Bangalore</span>
+        <span class="hero-meta-label">Koramangala</span>
       </div>
       <div class="hero-meta-item">
         <span class="hero-meta-num">3 <em>tiers</em></span>
@@ -980,10 +1196,73 @@
   </div>
 </footer>
 
+<!-- LIGHTBOX / GALLERY -->
+<div class="lightbox" id="lightbox" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="lightbox-title">
+  <div class="lightbox-backdrop" id="lightbox-backdrop"></div>
+  <div class="lightbox-shell">
+    <div class="lightbox-head">
+      <div>
+        <span class="eyebrow">Space gallery</span>
+        <h3 class="lightbox-title" id="lightbox-title">—</h3>
+      </div>
+      <div class="lightbox-meta">
+        <span class="lightbox-count" id="lightbox-count">00 / 00</span>
+        <button class="lightbox-icon-btn" id="lightbox-close" aria-label="Close gallery">
+          <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="m3 3 8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="lightbox-stage" id="lightbox-stage">
+      <button class="lightbox-nav prev" id="lightbox-prev" aria-label="Previous photo">
+        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 3 5 8l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <img id="lightbox-img" src="" alt="" />
+      <button class="lightbox-nav next" id="lightbox-next" aria-label="Next photo">
+        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="m6 3 5 5-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+
+    <div class="lightbox-thumbs" id="lightbox-thumbs"></div>
+  </div>
+</div>
+
 <script>
 const SHEET_ID = '1oTZ57MmWfe9mVEce9AAtb8nD0kNxbaekTiRSYvQZ2DE';
 const BASE     = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv`;
 const REFRESH  = 30_000;
+
+// ── PHOTO MAP ─────────────────────────────────────────────────────
+// Keyed by tab key → space name → { folder, files[] }
+// Folders are relative to the workspace root. Files are URL-encoded at render time.
+const PHOTOS_BASE = 'Evergreen House Membership Photos';
+const SPACE_PHOTOS = {
+  work: {
+    'Dedicated desk': { folder: 'Work Home/Dedicated Desk', files: ['PRS00462.jpg', 'PRS00501.jpg'] },
+    'Private room':   { folder: 'Work Home/Private Room',   files: ['PRS00449.jpg', 'PRS00705-Edit.jpg', 'PRS00735.jpg'] },
+    'Meeting room':   { folder: 'Work Home/Meeting Room',   files: ['PRS00318-Edit (1).jpg', 'PRS00416 (1).jpg', 'PRS00677-Edit.jpg', 'PRS00694 (1).jpg'] },
+    'LOVE OORU':      { folder: 'Love Ooru',                files: [] },
+  },
+  home: {
+    'Dedicated desk': { folder: 'Work Home/Dedicated Desk', files: ['PRS00462.jpg', 'PRS00501.jpg'] },
+    'Private room':   { folder: 'Work Home/Private Room',   files: ['PRS00449.jpg', 'PRS00705-Edit.jpg', 'PRS00735.jpg'] },
+    'Meeting room':   { folder: 'Work Home/Meeting Room',   files: ['PRS00318-Edit (1).jpg', 'PRS00416 (1).jpg', 'PRS00677-Edit.jpg', 'PRS00694 (1).jpg'] },
+    'LOVE OORU':      { folder: 'Love Ooru',                files: [] },
+  },
+  drafting: {
+    'Window single seat cabin': { folder: 'The Drafting Room/Window single seat cabin', files: [] },
+    'Window double seat cabin': { folder: 'The Drafting Room/Window double seat cabin', files: ['_SJP3009Edited-Edit.jpg'] },
+    'Double seat cabin':        { folder: 'The Drafting Room/Double seat cabin',        files: [] },
+    'Drafting table open seats':{ folder: 'The Drafting Room/Drafting table open seats',files: ['_SJP2837-Edit.jpg','_SJP2869-Edit.jpg','_SJP2889-Edit.jpg','_SJP3070-Edit.jpg'] },
+    'Meeting room':             { folder: 'The Drafting Room/Meeting room',             files: ['PRS00318-Edit (1).jpg','PRS00416 (1).jpg','PRS00677-Edit.jpg','PRS00694 (1).jpg'] },
+    'Lounge for Events':        { folder: 'The Drafting Room/Lounge for Events',        files: ['_SJP2750-Edit.jpg','_SJP2808-Edit.jpg','_SJP2980-Edit.jpg','_SJP3030-Edit.jpg','_SJP3057-Edit.jpg'] },
+  },
+};
+function photoUrls(tabKey, spaceName) {
+  const entry = (SPACE_PHOTOS[tabKey] || {})[spaceName];
+  if (!entry || !entry.files.length) return [];
+  return entry.files.map(f => encodeURI(`${PHOTOS_BASE}/${entry.folder}/${f}`));
+}
 
 // Members Credit static fallback
 const MEMBERS_STATIC = [
@@ -1179,6 +1458,21 @@ function renderPanel(tab, csvRows) {
     const includes = m.includes || 'What you get';
     const num = String(idx + 1).padStart(2, '0');
 
+    // Primary CTA = the original booking action (Choose desk / Book now / Apply for Draft …)
+    const primaryCta = `<button class="plan-cta">${m.cta}${arrowSvg}</button>`;
+
+    // Secondary CTA = "View space" gallery trigger (skipped for the Members tab —
+    // those cards have no folder photos). Empty folders → "Photos coming soon".
+    const photos = photoUrls(tab.key, name);
+    let viewCta = '';
+    if (tab.key !== 'members') {
+      if (photos.length > 0) {
+        viewCta = `<button class="plan-cta plan-cta-secondary" data-gallery-space="${encodeURIComponent(name)}" data-gallery-tab="${tab.key}">View space${arrowSvg}</button>`;
+      } else {
+        viewCta = `<button class="plan-cta plan-cta-secondary" disabled aria-disabled="true">Photos coming soon${arrowSvg}</button>`;
+      }
+    }
+
     cards += `
       <div class="plan-card${cls}">
         ${bdg}
@@ -1193,7 +1487,10 @@ function renderPanel(tab, csvRows) {
         </div>
         <div class="plan-includes">${includes}</div>
         <ul class="feature-list">${features}</ul>
-        <button class="plan-cta">${m.cta}${arrowSvg}</button>
+        <div class="plan-cta-row">
+          ${viewCta}
+          ${primaryCta}
+        </div>
       </div>`;
   });
 
@@ -1229,7 +1526,7 @@ function renderPanel(tab, csvRows) {
   return `
     <div class="plans-grid">${cards}</div>
 
-    <div id="compare" style="margin-bottom:1.4rem">
+    <div class="compare-anchor" style="margin-bottom:1.4rem">
       <span class="eyebrow">Compare</span>
       <h3 class="section-title" style="font-size:clamp(1.4rem,2.4vw,2rem);margin-bottom:.5rem">Compare ${tab.label.toLowerCase()}.</h3>
     </div>
@@ -1265,8 +1562,6 @@ function skeletonPanel(cols = 4) {
 }
 
 // ── INIT ──────────────────────────────────────────────────────────
-const dot      = document.getElementById('dot');
-const statusEl = document.getElementById('status-text');
 const tabNav   = document.getElementById('tab-nav');
 const panelsEl = document.getElementById('panels');
 const footerEl = document.getElementById('footer');
@@ -1304,8 +1599,6 @@ async function fetchSheet(tab) {
 }
 
 async function loadAll() {
-  dot.className = 'dot loading'; statusEl.textContent = 'Refreshing…';
-
   const membersTab = TABS.find(t => t.key === 'members');
   document.getElementById('panel-members').innerHTML = renderPanel(membersTab, MEMBERS_STATIC);
 
@@ -1326,17 +1619,124 @@ async function loadAll() {
     }
   });
 
-  if (anyError) {
-    dot.className = 'dot error'; statusEl.textContent = 'Fetch error — retrying';
-  } else {
-    dot.className = 'dot live';
-    statusEl.textContent = `Live · ${new Date().toLocaleTimeString()}`;
+  if (!anyError && footerEl) {
     footerEl.textContent = `Prices exclude all applicable taxes · last updated ${new Date().toLocaleTimeString()}`;
   }
 }
 
 loadAll();
 setInterval(loadAll, REFRESH);
+
+// ── COMPARE NAV LINK ──────────────────────────────────────────────
+// Each tab panel has its own .compare-anchor. Scroll to the one inside
+// the currently active panel (the only visible one).
+document.getElementById('nav-compare').addEventListener('click', e => {
+  e.preventDefault();
+  const activePanel = document.querySelector('.tab-panel.active');
+  if (!activePanel) return;
+  const anchor = activePanel.querySelector('.compare-anchor');
+  if (anchor) anchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+// ── GALLERY / LIGHTBOX ────────────────────────────────────────────
+const lb = {
+  el:        document.getElementById('lightbox'),
+  backdrop:  document.getElementById('lightbox-backdrop'),
+  stage:     document.getElementById('lightbox-stage'),
+  img:       document.getElementById('lightbox-img'),
+  titleEl:   document.getElementById('lightbox-title'),
+  countEl:   document.getElementById('lightbox-count'),
+  prevBtn:   document.getElementById('lightbox-prev'),
+  nextBtn:   document.getElementById('lightbox-next'),
+  closeBtn:  document.getElementById('lightbox-close'),
+  thumbsEl:  document.getElementById('lightbox-thumbs'),
+  photos:    [],
+  index:     0,
+  lastFocus: null,
+};
+
+function openGallery(title, photos) {
+  if (!photos || !photos.length) return;
+  lb.photos = photos;
+  lb.index = 0;
+  lb.lastFocus = document.activeElement;
+  lb.titleEl.textContent = title;
+  renderGallery();
+  lb.el.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('lb-open');
+  // Defer focus so the close button gets it after the modal is shown
+  requestAnimationFrame(() => lb.closeBtn.focus());
+}
+
+function closeGallery() {
+  lb.el.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('lb-open');
+  lb.img.src = '';
+  if (lb.lastFocus && typeof lb.lastFocus.focus === 'function') {
+    lb.lastFocus.focus();
+  }
+}
+
+function renderGallery() {
+  const { photos, index } = lb;
+  if (!photos.length) return;
+  // Stage
+  lb.img.src = photos[index];
+  lb.img.alt = `${lb.titleEl.textContent} — photo ${index + 1} of ${photos.length}`;
+  // Preload neighbours
+  [-1, 1].forEach(d => {
+    const j = (index + d + photos.length) % photos.length;
+    const pre = new Image(); pre.src = photos[j];
+  });
+  // Counter
+  const total = photos.length;
+  lb.countEl.textContent = `${String(index + 1).padStart(2, '0')} / ${String(total).padStart(2, '0')}`;
+  // Nav visibility
+  const multi = total > 1;
+  lb.prevBtn.style.display = multi ? '' : 'none';
+  lb.nextBtn.style.display = multi ? '' : 'none';
+  // Thumbnails
+  lb.thumbsEl.innerHTML = multi
+    ? photos.map((url, i) => `<button class="lightbox-thumb${i === index ? ' active' : ''}" data-index="${i}" aria-label="View photo ${i + 1}"><img src="${url}" alt="" loading="lazy"></button>`).join('')
+    : '';
+  // Scroll active thumb into view
+  const activeThumb = lb.thumbsEl.querySelector('.active');
+  if (activeThumb) activeThumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+}
+
+function navGallery(dir) {
+  if (!lb.photos.length) return;
+  lb.index = (lb.index + dir + lb.photos.length) % lb.photos.length;
+  renderGallery();
+}
+
+lb.closeBtn.addEventListener('click', closeGallery);
+lb.backdrop.addEventListener('click', closeGallery);
+lb.prevBtn.addEventListener('click', () => navGallery(-1));
+lb.nextBtn.addEventListener('click', () => navGallery(1));
+lb.thumbsEl.addEventListener('click', e => {
+  const t = e.target.closest('[data-index]');
+  if (t) { lb.index = parseInt(t.dataset.index, 10); renderGallery(); }
+});
+
+document.addEventListener('keydown', e => {
+  if (lb.el.getAttribute('aria-hidden') === 'false') {
+    if (e.key === 'Escape')     { e.preventDefault(); closeGallery(); }
+    else if (e.key === 'ArrowLeft')  { e.preventDefault(); navGallery(-1); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); navGallery(1); }
+  }
+});
+
+// Delegated handler for the "View space" CTA — works even after panel re-render.
+document.addEventListener('click', e => {
+  const btn = e.target.closest('[data-gallery-space]');
+  if (!btn) return;
+  const tabKey = btn.dataset.galleryTab;
+  const space  = decodeURIComponent(btn.dataset.gallerySpace);
+  const photos = photoUrls(tabKey, space);
+  if (!photos.length) return;
+  openGallery(space, photos);
+});
 </script>
 </body>
 </html>
