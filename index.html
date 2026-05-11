@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Evergreen House — Memberships, Spaces &amp; Members</title>
+
+  <!-- Editorial sans (Aeonik fallback) + serif accent + mono numerics -->
+  <link rel="preconnect" href="https://api.fontshare.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+  <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&f[]=fraunces@400,500,600&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" />
+
+  <style>
+    /* Aeonik first if installed locally — General Sans is the closest free alternative.
+       Fraunces is the editorial serif accent (used for hero italic accents). */
+
+    :root {
+      /* ── EDITORIAL CREAM PALETTE (Base39-style) ──────────── */
+      --paper:        #f4efe5;   /* warm page cream */
+      --paper-2:      #ede7d9;   /* slightly darker cream for sections */
+      --paper-3:      #e2dac8;   /* divider tint */
+      --surface:      #ffffff;   /* white cards */
+      --surface-soft: #faf6ee;   /* off-white subtle surface */
+
+      --ink:          #14140e;   /* near-black with warmth */
+      --ink-2:        #4d4d44;
+      --ink-3:        #807a6d;
+      --ink-4:        #b3ac9c;
+      --ink-5:        #d6cfbf;
+
+      --line:         rgba(20,20,14,0.10);
+      --line-2:       rgba(20,20,14,0.16);
+      --line-3:       rgba(20,20,14,0.24);
+
+      --accent:       #c8552b;   /* warm rust accent */
+      --accent-deep:  #9c3e1c;
+      --accent-soft:  rgba(200,85,43,0.10);
+
+      --green:        #3f7a4e;   /* deeper editorial green */
+      --green-soft:   rgba(63,122,78,0.10);
+      --green-bd:     rgba(63,122,78,0.28);
+
+      --radius-xl:    18px;
+      --radius:       12px;
+      --radius-sm:    8px;
+      --radius-pill:  999px;
+
+      --shadow-sm:    0 1px 2px rgba(20,20,14,.06);
+      --shadow:       0 4px 16px -4px rgba(20,20,14,.10), 0 1px 2px rgba(20,20,14,.06);
+      --shadow-lg:    0 24px 48px -16px rgba(20,20,14,.18);
+
+      --ease:         cubic-bezier(0.16, 1, 0.3, 1);
+
+      --font-sans:    'Aeonik', 'General Sans', 'Inter', -apple-system, system-ui, sans-serif;
+      --font-serif:   'Fraunces', 'Times New Roman', Georgia, serif;
+      --font-mono:    'JetBrains Mono', 'SF Mono', ui-monospace, Menlo, monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; background: var(--paper); }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--paper);
+      color: var(--ink);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      min-height: 100vh;
+      letter-spacing: -0.01em;
+    }
+
+    ::selection { background: var(--ink); color: var(--paper); }
+
+    /* ── TOPBAR ───────────────────────────────────────────── */
+    .topbar {
+      display: flex; align-items: center;
+      padding: 1rem 2rem;
+      border-bottom: 1px solid var(--line);
+      background: rgba(244,239,229,0.85);
+      backdrop-filter: blur(14px) saturate(160%);
+      -webkit-backdrop-filter: blur(14px) saturate(160%);
+      position: sticky; top: 0; z-index: 50;
+    }
+    .logo {
+      display: flex; align-items: center; gap: .55rem;
+      font-weight: 600; font-size: 1.02rem;
+      color: var(--ink); letter-spacing: -.025em;
+    }
+    .logo-mark {
+      width: 26px; height: 26px;
+      border-radius: 7px;
+      background: var(--ink); color: var(--paper);
+      display: grid; place-items: center;
+      flex-shrink: 0;
+    }
+    .logo-mark svg { width: 14px; height: 14px; }
+
+    .topbar-nav { display: flex; gap: .15rem; margin-left: 2.5rem; }
+    .topbar-nav a {
+      color: var(--ink-2); text-decoration: none;
+      font-size: .85rem; font-weight: 500;
+      padding: .45rem .8rem; border-radius: var(--radius-sm);
+      letter-spacing: -.005em;
+      transition: color .18s var(--ease), background .18s var(--ease);
+    }
+    .topbar-nav a:hover { color: var(--ink); background: rgba(20,20,14,0.04); }
+
+    .status-pill {
+      margin-left: auto;
+      display: inline-flex; align-items: center; gap: .5rem;
+      font-family: var(--font-mono);
+      font-size: .72rem; color: var(--ink-3);
+      padding: .42rem .8rem .42rem .65rem;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-pill);
+      background: rgba(255,255,255,0.5);
+      letter-spacing: 0;
+    }
+    .dot {
+      width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+      background: var(--green);
+      box-shadow: 0 0 8px currentColor;
+    }
+    .dot.live    { color: var(--green); animation: pulse 2.4s ease infinite; }
+    .dot.loading { background: #c08a17; color: #c08a17; animation: pulse 1.4s ease infinite; }
+    .dot.error   { background: #b91c1c; color: #b91c1c; }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: .35; transform: scale(.7); }
+    }
+
+    /* ── PAGE SHELL ───────────────────────────────────────── */
+    .page { max-width: 1280px; margin: 0 auto; padding: 0 2rem; }
+    section { position: relative; }
+
+    /* ── EYEBROW + SECTION TITLES (Base39 rhythm) ─────────── */
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: .5rem;
+      font-size: .68rem; font-weight: 600;
+      color: var(--ink-3);
+      text-transform: uppercase; letter-spacing: .18em;
+      margin-bottom: 1.4rem;
+    }
+    .eyebrow::before {
+      content: '';
+      width: 22px; height: 1px;
+      background: var(--ink-3);
+    }
+
+    .section-title {
+      font-size: clamp(1.9rem, 4.4vw, 3.2rem);
+      font-weight: 500;
+      letter-spacing: -.035em;
+      line-height: 1.05;
+      color: var(--ink);
+      margin-bottom: 1.2rem;
+      max-width: 920px;
+    }
+    .section-title em {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-weight: 400;
+      color: var(--ink);
+    }
+    .section-lede {
+      font-size: clamp(1rem, 1.4vw, 1.1rem);
+      color: var(--ink-2);
+      line-height: 1.55;
+      max-width: 640px;
+      margin-bottom: 3rem;
+      letter-spacing: -.005em;
+    }
+
+    /* ── HERO ─────────────────────────────────────────────── */
+    .hero { padding: 6rem 0 4.5rem; }
+    .hero h1 {
+      font-size: clamp(3rem, 8.5vw, 6.5rem);
+      font-weight: 500;
+      letter-spacing: -.05em;
+      line-height: .96;
+      color: var(--ink);
+      margin-bottom: 1.5rem;
+      max-width: 14ch;
+    }
+    .hero h1 em {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-weight: 400;
+    }
+    .hero-lede {
+      font-size: clamp(1.05rem, 1.5vw, 1.2rem);
+      color: var(--ink-2);
+      max-width: 540px;
+      margin-bottom: 2.5rem;
+      line-height: 1.55;
+      letter-spacing: -.005em;
+    }
+    .hero-cta-row { display: inline-flex; gap: .6rem; flex-wrap: wrap; }
+
+    /* ── BUTTONS (pill with arrow) ────────────────────────── */
+    .btn {
+      display: inline-flex; align-items: center; gap: .65rem;
+      padding: .9rem 1.3rem .9rem 1.5rem;
+      border-radius: var(--radius-pill);
+      font-family: inherit;
+      font-size: .87rem; font-weight: 500;
+      letter-spacing: -.01em;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: transform .15s var(--ease), background .18s var(--ease), border-color .18s var(--ease), color .18s var(--ease), box-shadow .18s var(--ease);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .btn-arrow {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: currentColor;
+      display: grid; place-items: center;
+      transition: transform .25s var(--ease);
+    }
+    .btn-arrow svg { width: 10px; height: 10px; }
+    .btn:hover .btn-arrow { transform: translateX(2px); }
+
+    .btn-primary { background: var(--ink); color: var(--paper); }
+    .btn-primary .btn-arrow svg { color: var(--ink); }
+    .btn-primary:hover { background: var(--ink-2); }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--ink);
+      border-color: var(--line-2);
+    }
+    .btn-ghost .btn-arrow { background: var(--ink); color: var(--ink); }
+    .btn-ghost .btn-arrow svg { color: var(--paper); }
+    .btn-ghost:hover { border-color: var(--ink); background: rgba(20,20,14,0.04); }
+
+    /* ── HERO META BAND ───────────────────────────────────── */
+    .hero-meta {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      margin-top: 5rem;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+    .hero-meta-item {
+      padding: 1.5rem 1.5rem;
+      border-right: 1px solid var(--line);
+      display: flex; flex-direction: column; gap: .35rem;
+    }
+    .hero-meta-item:last-child { border-right: none; }
+    .hero-meta-num {
+      font-size: 2rem; font-weight: 500;
+      letter-spacing: -.035em;
+      font-feature-settings: 'tnum' on;
+    }
+    .hero-meta-num em { font-family: var(--font-serif); font-style: italic; font-weight: 400; }
+    .hero-meta-label {
+      font-size: .72rem; font-weight: 500;
+      color: var(--ink-3);
+      text-transform: uppercase; letter-spacing: .14em;
+    }
+
+    /* ── SECTION SHELL ────────────────────────────────────── */
+    .section-block { padding: 6rem 0; }
+    .section-block.tight { padding: 4rem 0; }
+
+    /* ── SEGMENTED TAB CONTROL ────────────────────────────── */
+    .seg-wrap { margin-bottom: 3rem; }
+    .seg {
+      display: inline-flex;
+      padding: 4px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.55);
+      border-radius: var(--radius-pill);
+      gap: 2px;
+      max-width: 100%;
+      overflow-x: auto;
+      scrollbar-width: none;
+      backdrop-filter: blur(8px);
+    }
+    .seg::-webkit-scrollbar { display: none; }
+    .seg-btn {
+      padding: .6rem 1.15rem;
+      border-radius: var(--radius-pill);
+      border: none;
+      background: transparent;
+      color: var(--ink-2);
+      font-family: inherit;
+      font-size: .82rem; font-weight: 500;
+      cursor: pointer;
+      letter-spacing: -.012em;
+      transition: color .2s var(--ease), background .2s var(--ease);
+      white-space: nowrap;
+    }
+    .seg-btn:hover:not(.active) { color: var(--ink); }
+    .seg-btn.active {
+      background: var(--ink); color: var(--paper);
+      font-weight: 500;
+    }
+
+    /* ── PANEL ────────────────────────────────────────────── */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; animation: fade .35s var(--ease); }
+    @keyframes fade {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    /* ── PRICING CARD GRID ────────────────────────────────── */
+    .plans-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1px;
+      background: var(--line);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 5rem;
+    }
+    .plan-card {
+      position: relative;
+      background: var(--surface);
+      padding: 2rem 1.75rem 1.75rem;
+      display: flex; flex-direction: column;
+      min-height: 540px;
+      transition: background .25s var(--ease), transform .25s var(--ease);
+    }
+    .plan-card:hover { background: var(--surface-soft); }
+
+    .plan-card.highlight {
+      background: var(--surface);
+      box-shadow: inset 0 3px 0 var(--green), inset 0 0 0 1px rgba(63,122,78,0.16);
+    }
+    .plan-card.highlight:hover { background: var(--surface-soft); }
+    .plan-card.featured {
+      background:
+        radial-gradient(ellipse 100% 70% at 50% 0%, rgba(200,85,43,0.10) 0%, transparent 60%),
+        linear-gradient(180deg, #1a1610 0%, #14140e 100%);
+      color: var(--paper);
+    }
+    .plan-card.featured:hover { background:
+        radial-gradient(ellipse 100% 70% at 50% 0%, rgba(200,85,43,0.16) 0%, transparent 60%),
+        linear-gradient(180deg, #221c14 0%, #181812 100%);
+    }
+
+    /* badge */
+    .badge-pop {
+      position: absolute; top: 1.5rem; right: 1.5rem;
+      font-family: var(--font-mono);
+      font-size: .65rem; font-weight: 500;
+      color: var(--ink-3);
+      text-transform: uppercase; letter-spacing: .1em;
+      display: inline-flex; align-items: center; gap: .35rem;
+    }
+    .badge-pop::before {
+      content: '';
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent);
+    }
+    .plan-card.featured .badge-pop { color: var(--ink-5); }
+    .plan-card.featured .badge-pop::before { background: var(--accent); }
+    .plan-card.highlight .badge-pop { color: var(--green); }
+    .plan-card.highlight .badge-pop::before { background: var(--green); }
+
+    .plan-card-head { margin-bottom: 1.6rem; }
+    .plan-num {
+      font-family: var(--font-mono);
+      font-size: .68rem; font-weight: 500;
+      color: var(--ink-3);
+      text-transform: uppercase; letter-spacing: .14em;
+      margin-bottom: 1rem;
+      display: inline-flex; align-items: center; gap: .5rem;
+    }
+    .plan-num::before {
+      content: ''; width: 18px; height: 1px; background: var(--ink-4);
+    }
+    .plan-card.featured .plan-num { color: var(--ink-4); }
+    .plan-card.featured .plan-num::before { background: var(--ink-3); }
+
+    .plan-name {
+      font-size: 1.5rem; font-weight: 500;
+      color: inherit; letter-spacing: -.028em;
+      margin-bottom: .5rem;
+      line-height: 1.1;
+    }
+    .plan-tagline {
+      font-size: .88rem;
+      color: var(--ink-2);
+      line-height: 1.5;
+      letter-spacing: -.005em;
+    }
+    .plan-card.featured .plan-tagline { color: var(--ink-5); }
+
+    .plan-price-block {
+      padding: 1.25rem 0;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 1.5rem;
+      display: flex; align-items: baseline; gap: .5rem;
+    }
+    .plan-card.featured .plan-price-block { border-color: rgba(245,239,229,0.12); }
+    .plan-price {
+      font-size: 2.6rem; font-weight: 500;
+      color: inherit; letter-spacing: -.045em;
+      line-height: 1;
+      font-feature-settings: 'tnum' on;
+    }
+    .plan-price em { font-family: var(--font-serif); font-style: italic; font-weight: 400; }
+    .plan-price-unit {
+      font-size: .82rem;
+      color: var(--ink-3);
+      font-weight: 500;
+      letter-spacing: -.005em;
+    }
+    .plan-card.featured .plan-price-unit { color: var(--ink-4); }
+
+    .plan-includes {
+      font-family: var(--font-mono);
+      font-size: .68rem; color: var(--ink-3);
+      margin-bottom: 1rem; font-weight: 500;
+      text-transform: uppercase; letter-spacing: .1em;
+    }
+    .plan-card.featured .plan-includes { color: var(--ink-4); }
+
+    .feature-list {
+      list-style: none;
+      display: flex; flex-direction: column;
+      gap: .7rem;
+      flex: 1;
+      margin-bottom: 1.75rem;
+    }
+    .feature-list li {
+      display: flex; align-items: flex-start; gap: .7rem;
+      font-size: .9rem;
+      color: inherit;
+      line-height: 1.45;
+      letter-spacing: -.005em;
+    }
+    .feature-list li::before {
+      content: '';
+      flex-shrink: 0;
+      width: 5px; height: 5px;
+      margin-top: 9px;
+      border-radius: 50%;
+      background: var(--ink);
+    }
+    .plan-card.featured .feature-list li::before { background: var(--accent); }
+    .plan-card.highlight .feature-list li::before { background: var(--green); }
+
+    .plan-cta {
+      display: inline-flex; align-items: center; gap: .65rem;
+      padding: .9rem 1.3rem .9rem 1.5rem;
+      border-radius: var(--radius-pill);
+      background: var(--ink); color: var(--paper);
+      border: none;
+      font-family: inherit;
+      font-size: .87rem; font-weight: 500;
+      cursor: pointer;
+      transition: transform .15s var(--ease), background .18s var(--ease);
+      letter-spacing: -.01em;
+      width: 100%;
+      justify-content: space-between;
+    }
+    .plan-cta .btn-arrow { width: 22px; height: 22px; background: var(--paper); color: var(--paper); }
+    .plan-cta .btn-arrow svg { color: var(--ink); width: 10px; height: 10px; }
+    .plan-cta:hover { background: var(--ink-2); }
+    .plan-cta:hover .btn-arrow { transform: translateX(2px); }
+
+    .plan-card.featured .plan-cta { background: var(--accent); }
+    .plan-card.featured .plan-cta .btn-arrow svg { color: var(--accent); }
+    .plan-card.featured .plan-cta:hover { background: var(--accent-deep); }
+
+    .plan-card.highlight .plan-cta { background: var(--green); }
+    .plan-card.highlight .plan-cta .btn-arrow svg { color: var(--green); }
+
+    /* ── COMPARE TABLE ────────────────────────────────────── */
+    .compare-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      background: var(--surface);
+      box-shadow: var(--shadow-sm);
+    }
+    table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; }
+    col.label-col { width: 200px; }
+
+    thead th {
+      padding: 1.4rem 1rem;
+      vertical-align: middle;
+      background: var(--surface-soft);
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+    }
+    thead th.corner-th { padding-left: 1.75rem; }
+    thead th:not(:last-child) { border-right: 1px solid var(--line); }
+    thead th:not(.corner-th) { text-align: center; }
+
+    .corner-label {
+      font-family: var(--font-mono);
+      font-size: .65rem; text-transform: uppercase;
+      letter-spacing: .14em; color: var(--ink-3);
+      font-weight: 500;
+    }
+    .col-head-name {
+      font-size: .92rem; font-weight: 500; color: var(--ink);
+      letter-spacing: -.018em;
+      display: block;
+    }
+    .col-head-meta {
+      font-family: var(--font-mono);
+      font-size: .65rem; color: var(--ink-3);
+      text-transform: uppercase; letter-spacing: .12em;
+      margin-top: .25rem; font-weight: 500;
+    }
+
+    .section-row td {
+      padding: 1.1rem 1.75rem .65rem;
+      font-family: var(--font-mono);
+      font-size: .65rem; font-weight: 500;
+      text-transform: uppercase; letter-spacing: .14em;
+      color: var(--ink-3);
+      background: var(--paper-2);
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    tbody tr.data-row td { border-bottom: 1px solid var(--line); transition: background .18s var(--ease); }
+    tbody tr.data-row:last-child td { border-bottom: none; }
+    tbody tr.data-row:hover td { background: var(--surface-soft); }
+    tbody tr.data-row td:not(:last-child) { border-right: 1px solid var(--line); }
+
+    td.row-label {
+      padding: 1.1rem 1.75rem;
+      font-size: .88rem; font-weight: 500; color: var(--ink-2);
+      letter-spacing: -.005em;
+    }
+    td.val {
+      text-align: center;
+      padding: 1.1rem .8rem;
+      font-size: .88rem;
+      vertical-align: middle;
+    }
+    td.val .price {
+      font-weight: 500; color: var(--ink); font-size: 1rem;
+      letter-spacing: -.025em;
+      font-feature-settings: 'tnum' on;
+    }
+    td.val .unit  { display: block; font-size: .68rem; color: var(--ink-3); margin-top: .22rem; font-weight: 500; }
+    td.val .yes-chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: var(--green-soft);
+      color: var(--green);
+      border: 1px solid var(--green-bd);
+      border-radius: var(--radius-pill); padding: 4px 11px 4px 8px;
+      font-size: .72rem; font-weight: 500;
+      letter-spacing: -.005em;
+    }
+    td.val .yes-chip svg { width: 10px; height: 10px; }
+    td.val .text-val { font-size: .8rem; color: var(--ink-2); line-height: 1.5; overflow-wrap: break-word; word-break: break-word; display: block; }
+    td.val .pct-val { font-weight: 500; color: var(--ink); font-feature-settings: 'tnum' on; font-size: .95rem; }
+    td.val.na      { color: var(--ink-4); font-size: 1.1rem; line-height: 1; }
+
+    .footnote {
+      margin-top: 1.5rem;
+      font-size: .78rem; color: var(--ink-3);
+      line-height: 1.65;
+      max-width: 720px;
+      letter-spacing: -.005em;
+    }
+
+    /* ── FAQ ──────────────────────────────────────────────── */
+    .faq-list {
+      max-width: 880px;
+      border-top: 1px solid var(--line);
+    }
+    .faq-item { border-bottom: 1px solid var(--line); }
+    .faq-item summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 1.6rem .25rem;
+      display: flex; justify-content: space-between; align-items: flex-start;
+      gap: 2rem;
+      font-size: clamp(1.05rem, 1.6vw, 1.25rem); font-weight: 500;
+      color: var(--ink); letter-spacing: -.022em;
+      line-height: 1.3;
+      transition: color .2s var(--ease);
+    }
+    .faq-item summary::-webkit-details-marker { display: none; }
+    .faq-item summary::after {
+      content: '';
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background:
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'><path d='M6 1.5v9M1.5 6h9' stroke='%2314140e' stroke-width='1.4' stroke-linecap='round'/></svg>") center/12px no-repeat,
+        transparent;
+      border: 1px solid var(--line-2);
+      transition: transform .3s var(--ease), background-color .2s, border-color .2s;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .faq-item[open] summary::after {
+      transform: rotate(45deg);
+      background-color: var(--ink);
+      border-color: var(--ink);
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'><path d='M6 1.5v9M1.5 6h9' stroke='%23f4efe5' stroke-width='1.4' stroke-linecap='round'/></svg>");
+    }
+    .faq-item summary:hover { color: var(--accent); }
+    .faq-answer {
+      padding: 0 0 1.75rem;
+      font-size: 1rem; color: var(--ink-2);
+      line-height: 1.7;
+      max-width: 700px;
+      letter-spacing: -.005em;
+    }
+
+    /* ── CTA STRIP ────────────────────────────────────────── */
+    .cta-strip {
+      margin: 0 0 5rem;
+      padding: 4.5rem 3rem;
+      border-radius: var(--radius-xl);
+      background:
+        radial-gradient(ellipse 60% 80% at 100% 50%, rgba(200,85,43,0.16) 0%, transparent 65%),
+        linear-gradient(180deg, #1a1610 0%, #14140e 100%);
+      color: var(--paper);
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      align-items: center;
+      gap: 3rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-strip h2 {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 500;
+      letter-spacing: -.035em;
+      line-height: 1.05;
+      margin-bottom: 1rem;
+      max-width: 14ch;
+    }
+    .cta-strip h2 em { font-family: var(--font-serif); font-style: italic; font-weight: 400; }
+    .cta-strip p {
+      color: var(--ink-5); font-size: 1rem;
+      line-height: 1.55; max-width: 38ch;
+      letter-spacing: -.005em;
+    }
+    .cta-strip .eyebrow { color: var(--ink-4); margin-bottom: 1rem; }
+    .cta-strip .eyebrow::before { background: var(--ink-4); }
+    .cta-strip-actions {
+      display: flex; flex-direction: column; gap: .6rem;
+      align-items: stretch;
+    }
+    .cta-strip-actions .btn { justify-content: space-between; }
+    .cta-strip .btn-primary {
+      background: var(--accent); color: #fff;
+    }
+    .cta-strip .btn-primary .btn-arrow { background: #fff; }
+    .cta-strip .btn-primary .btn-arrow svg { color: var(--accent); }
+    .cta-strip .btn-primary:hover { background: var(--accent-deep); }
+    .cta-strip .btn-ghost {
+      color: var(--paper);
+      border-color: rgba(245,239,229,0.24);
+    }
+    .cta-strip .btn-ghost .btn-arrow { background: var(--paper); color: var(--paper); }
+    .cta-strip .btn-ghost .btn-arrow svg { color: var(--ink); }
+    .cta-strip .btn-ghost:hover { border-color: var(--paper); background: rgba(245,239,229,0.06); }
+
+    /* ── FOOTER ───────────────────────────────────────────── */
+    .site-footer {
+      border-top: 1px solid var(--line);
+      padding: 4rem 0 2.5rem;
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 3rem;
+      margin-bottom: 4rem;
+    }
+    .footer-brand h3 {
+      font-size: clamp(1.5rem, 2.4vw, 2rem);
+      font-weight: 500;
+      letter-spacing: -.03em;
+      line-height: 1.1;
+      margin-bottom: 1rem;
+      max-width: 18ch;
+    }
+    .footer-brand h3 em { font-family: var(--font-serif); font-style: italic; font-weight: 400; }
+    .footer-brand p { color: var(--ink-2); font-size: .9rem; max-width: 36ch; line-height: 1.55; }
+    .footer-col h4 {
+      font-family: var(--font-mono);
+      font-size: .68rem; font-weight: 500;
+      color: var(--ink-3);
+      text-transform: uppercase; letter-spacing: .14em;
+      margin-bottom: 1rem;
+    }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: .55rem; }
+    .footer-col a {
+      color: var(--ink); text-decoration: none;
+      font-size: .92rem; font-weight: 500;
+      letter-spacing: -.012em;
+      transition: color .18s var(--ease);
+    }
+    .footer-col a:hover { color: var(--accent); }
+    .footer-bottom {
+      padding-top: 2rem;
+      border-top: 1px solid var(--line);
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 1rem;
+      font-family: var(--font-mono);
+      font-size: .72rem; color: var(--ink-3);
+      letter-spacing: 0;
+    }
+
+    /* ── SKELETON ─────────────────────────────────────────── */
+    .skeleton {
+      height: 12px; border-radius: 4px;
+      background: linear-gradient(90deg, var(--surface) 25%, var(--surface-soft) 50%, var(--surface) 75%);
+      background-size: 200% 100%; animation: shimmer 1.8s infinite;
+      margin: 0 auto; width: 60%;
+    }
+    .skeleton-card {
+      background: var(--surface);
+      padding: 2rem 1.75rem; min-height: 540px;
+      display: flex; flex-direction: column; gap: 1rem;
+    }
+    @keyframes shimmer { to { background-position: -200% 0; } }
+
+    /* ── SEG SCROLL FADE ─────────────────────────────────── */
+    .seg-wrap { position: relative; }
+    .seg-wrap::after {
+      content: '';
+      position: absolute; top: 0; right: 0;
+      width: 3rem; height: 100%;
+      background: linear-gradient(to right, transparent, var(--paper));
+      pointer-events: none;
+    }
+
+    /* ── COMPARE SCROLL HINT ─────────────────────────────── */
+    .compare-hint {
+      font-size: .72rem; color: var(--ink-4);
+      margin-bottom: .75rem;
+      display: none;
+      align-items: center; gap: .4rem;
+    }
+    @media (max-width: 640px) { .compare-hint { display: flex; } }
+
+    /* ── RESPONSIVE ───────────────────────────────────────── */
+    @media (max-width: 640px) {
+      .topbar { padding: .85rem 1.1rem; }
+      .topbar-nav { display: none; }
+      .page { padding: 0 1.1rem; }
+      .hero { padding: 4rem 0 3rem; }
+      .section-block { padding: 4rem 0; }
+
+      /* Hero CTA: full-width stacked buttons */
+      .hero-cta-row { flex-direction: column; width: 100%; }
+      .hero-cta-row .btn { width: 100%; justify-content: space-between; }
+
+      /* Hero meta: single column */
+      .hero-meta { grid-template-columns: 1fr; }
+      .hero-meta-item { border-right: none; border-bottom: 1px solid var(--line); }
+      .hero-meta-item:last-child { border-bottom: none; }
+
+      /* Plans */
+      .plans-grid { grid-template-columns: 1fr; }
+      .plan-card { min-height: auto; padding: 1.75rem 1.25rem; }
+      .plan-price { font-size: 2.2rem; }
+
+      /* Table */
+      col.label-col { width: 120px; }
+      td.row-label  { font-size: .78rem; padding: .85rem .85rem; }
+      td.val        { font-size: .82rem; padding: .85rem .4rem; }
+      thead th { padding: .85rem .5rem; }
+      thead th.corner-th { padding-left: .85rem; }
+
+      /* Seg */
+      .seg { padding: 3px; }
+      .seg-btn { padding: .55rem .85rem; font-size: .78rem; }
+
+      /* CTA strip */
+      .cta-strip { grid-template-columns: 1fr; padding: 2.5rem 1.5rem; gap: 2rem; }
+
+      /* Footer */
+      .footer-grid { grid-template-columns: 1fr; gap: 2rem; }
+      .footer-brand { grid-column: span 1; }
+      .footer-bottom { flex-direction: column; align-items: flex-start; gap: .5rem; }
+    }
+
+    @media (min-width: 641px) and (max-width: 880px) {
+      /* Tablet: keep 2-col footer, 2-col hero meta */
+      .hero-meta { grid-template-columns: repeat(3, 1fr); }
+      .footer-grid { grid-template-columns: 1fr 1fr; gap: 2rem; }
+      .footer-brand { grid-column: span 2; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- topbar -->
+<header class="topbar">
+  <span class="logo">
+    <span class="logo-mark">
+      <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 11V3l5-1.5L12 3v8L7 12.5 2 11Zm0-8 5 1.5m0 0L12 3M7 4.5v8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </span>
+    Evergreen House
+  </span>
+  <nav class="topbar-nav">
+    <a href="#spaces">Spaces</a>
+    <a href="#compare">Compare</a>
+    <a href="#faq">FAQ</a>
+    <a href="#contact">Contact</a>
+  </nav>
+  <div class="status-pill">
+    <div class="dot loading" id="dot"></div>
+    <span id="status-text">Loading…</span>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="page">
+  <section class="hero">
+    <span class="eyebrow">Memberships &middot; Spaces &middot; Members</span>
+    <h1>A house for the way you <em>work</em>, eat, and gather.</h1>
+    <p class="hero-lede">Evergreen House is a flexible workspace, members club, and gathering space — designed for makers, founders, and creatives in Bangalore.</p>
+    <div class="hero-cta-row">
+      <a href="#spaces" class="btn btn-primary">
+        Explore the spaces
+        <span class="btn-arrow"><svg viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 5h6m0 0L5 2m3 3L5 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </a>
+      <a href="#contact" class="btn btn-ghost">
+        Become a member
+        <span class="btn-arrow"><svg viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 5h6m0 0L5 2m3 3L5 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </a>
+    </div>
+
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <span class="hero-meta-num">3 <em>spaces</em></span>
+        <span class="hero-meta-label">Across Bangalore</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-num">3 <em>tiers</em></span>
+        <span class="hero-meta-label">Of membership</span>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hero-meta-num">24 <em>/7</em></span>
+        <span class="hero-meta-label">Member access</span>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- SPACES + PRICING -->
+<div class="page" id="spaces">
+  <section class="section-block">
+    <span class="eyebrow">Our spaces</span>
+    <h2 class="section-title">Designed for work, <em>creation</em>, and collaboration.</h2>
+    <p class="section-lede">Each space at Evergreen House has its own personality — quiet cabins for deep work, open studios for creative teams, and signature rooms for events that matter. Pricing updates live from our internal system.</p>
+
+    <div class="seg-wrap">
+      <div class="seg" id="tab-nav" role="tablist"></div>
+    </div>
+
+    <div id="panels"></div>
+  </section>
+</div>
+
+<!-- FAQ -->
+<div class="page" id="faq">
+  <section class="section-block">
+    <span class="eyebrow">Questions</span>
+    <h2 class="section-title">Things people often <em>ask</em>.</h2>
+    <p class="section-lede">Everything you need to know about memberships, bookings, and the way the house works. Can't find your answer? Reach out anytime.</p>
+
+    <div class="faq-list">
+      <details class="faq-item">
+        <summary>How does pricing work at Evergreen House?</summary>
+        <div class="faq-answer">Each space — Evergreen Work, Work Home, and The Drafting Room — has its own subscriptions, hourly rates, and day passes. Pricing updates live from our internal system, so what you see here is always current.</div>
+      </details>
+      <details class="faq-item">
+        <summary>What do membership credits include?</summary>
+        <div class="faq-answer">1 credit = ₹100 of value, redeemable across bookings, food, drinks, and partner experiences inside the house. Credits never expire while your membership is active.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Can I book a meeting room without being a member?</summary>
+        <div class="faq-answer">Yes. Meeting rooms are available hourly to anyone, but members get preferred pricing and priority availability windows.</div>
+      </details>
+      <details class="faq-item">
+        <summary>What is the difference between Landmark, Foundry, and Draft cards?</summary>
+        <div class="faq-answer">Landmark is the entry tier with essential perks. Foundry adds wine discounts, member events, and longer validity. Draft is invite-only — concierge access, secret menu items, and 6 month validity. Compare them in the Members Credit tab above.</div>
+      </details>
+      <details class="faq-item">
+        <summary>How do I get an invite for the Draft Card?</summary>
+        <div class="faq-answer">The Draft Card requires an invite plus a referral from an existing member. If you've been recommended, our team will reach out with next steps.</div>
+      </details>
+      <details class="faq-item">
+        <summary>What's included with food &amp; beverages?</summary>
+        <div class="faq-answer">Members get full access to the Love Ooru wine menu, Blue Tokai coffee, the Pizza Express menu, and a curated beer selection — billed at menu price plus a 20% service charge.</div>
+      </details>
+      <details class="faq-item">
+        <summary>Can I cancel or pause my subscription?</summary>
+        <div class="faq-answer">Yes. Subscriptions remain active until the end of the current billing cycle, then will not auto-renew. To pause or modify mid-cycle, reach out at the front desk.</div>
+      </details>
+      <details class="faq-item">
+        <summary>What payment methods do you accept?</summary>
+        <div class="faq-answer">UPI, all major credit and debit cards, and bank transfer for annual plans. Memberships and subscriptions are billed monthly from the day you join.</div>
+      </details>
+    </div>
+  </section>
+</div>
+
+<!-- CTA STRIP -->
+<div class="page" id="contact">
+  <section class="cta-strip">
+    <div>
+      <span class="eyebrow">Get involved</span>
+      <h2>Find your <em>place</em> at Evergreen House.</h2>
+      <p>Tour the house, meet the team, and discover the right plan for the way you actually work.</p>
+    </div>
+    <div class="cta-strip-actions">
+      <a href="#spaces" class="btn btn-primary">
+        Browse plans
+        <span class="btn-arrow"><svg viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 5h6m0 0L5 2m3 3L5 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </a>
+      <a href="mailto:hello@evergreenhouse.in" class="btn btn-ghost">
+        Talk to us
+        <span class="btn-arrow"><svg viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 5h6m0 0L5 2m3 3L5 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </a>
+    </div>
+  </section>
+</div>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="page">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <h3>A house for <em>work</em>, made for community.</h3>
+        <p>A flexible workspace, members club, and gathering space — designed for makers, founders, and creatives in Bangalore.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Spaces</h4>
+        <ul>
+          <li><a href="#spaces">Work Home</a></li>
+          <li><a href="#spaces">The Drafting Room</a></li>
+          <li><a href="#spaces">Members Credit</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#faq">FAQs</a></li>
+          <li><a href="#contact">Contact</a></li>
+          <li><a href="#">Press</a></li>
+          <li><a href="#">Careers</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Connect</h4>
+        <ul>
+          <li><a href="#">Instagram</a></li>
+          <li><a href="#">LinkedIn</a></li>
+          <li><a href="mailto:hello@evergreenhouse.in">Email</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span id="footer">Prices exclude all applicable taxes, levies and duties.</span>
+      <span>© 2026 Evergreen House &middot; Bangalore, India</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+const SHEET_ID = '1oTZ57MmWfe9mVEce9AAtb8nD0kNxbaekTiRSYvQZ2DE';
+const BASE     = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv`;
+const REFRESH  = 30_000;
+
+// Members Credit static fallback
+const MEMBERS_STATIC = [
+  ['Card','Price','1 Credit = 100 Rs','Discount on Wine','EVENTS - Member Pricing for Events','GUEST PASSES','PREFERRED AIRBNB pricing located just one min walk away from Evergreen House','PERKS','VALIDITY','INVITE','Food and Beverages - Love ooru Wine Menu, Blue tokai and Pizza Express - Full menu Plus Beer'],
+  ['LANDMARK CARD','₹10000','100 credits','','','Yes','10% off','','2 months','Open','Yes'],
+  ['FOUNDRY CARD', '₹25000','300 credits','10%','Private members events · Founder events','Yes','20% off','','3 months','Open','Yes'],
+  ['DRAFT CARD',   '₹35000','500 credits','20%','Private members events · Founder events · Host community events','Yes','25% off','Secret menu items · Concierge assistance','6 months','Invite + referral required','Yes'],
+];
+
+const TABS = [
+  {
+    key: 'home', label: 'Work Home', param: 'Work Home',
+    cornerLabel: 'Pass type',
+    rowSections: [[0,0,'Subscriptions'],[1,1,'Hourly'],[2,4,'Day & multi-day passes']],
+    colMeta: {
+      'Dedicated desk': {
+        tagline:'Your own permanent desk in a vibrant shared space.', cta:'Choose desk',
+        includes:'What you get',
+        features:['Permanent personal desk','High-speed Wi-Fi','House library access','Garden seating','Filtered water &amp; tea'],
+      },
+      'Private room':   {
+        tagline:'Fully enclosed private office for you or your team.', cta:'Choose room', style:'highlight', badge:'Most popular',
+        includes:'Everything in Desk, plus',
+        features:['Private cabin','Seats up to 4','Hourly meeting credits','Quiet zone access','Member events'],
+      },
+      'Meeting room':   {
+        tagline:'Bookable rooms for standups, interviews &amp; sessions.', cta:'Book now',
+        includes:'What you get',
+        features:['Hourly availability','TV &amp; whiteboard','Reliable video conferencing','Tea &amp; coffee'],
+      },
+      'LOVE OORU':      {
+        tagline:'Premium event &amp; creative space for special occasions.', cta:'Enquire now', style:'featured', badge:'Signature space',
+        includes:'Everything in Room, plus',
+        features:['Full venue access','Custom catering','Sound &amp; lighting','Event manager','Brand activations welcome'],
+      },
+    },
+  },
+  {
+    key: 'drafting', label: 'The Drafting Room', param: 'The Drafting Room',
+    cornerLabel: 'Pass type',
+    rowSections: [[0,0,'Subscriptions'],[1,1,'Hourly'],[2,4,'Day & multi-day passes']],
+    colMeta: {
+      'Window single seat cabin': {
+        tagline:'Window-facing private single cabin with natural light.', cta:'Choose cabin', style:'highlight', badge:'Most popular',
+        includes:'What you get',
+        features:['Natural-light window cabin','Ergonomic chair &amp; desk','Power &amp; ethernet','Quiet floor','Locker'],
+      },
+      'Window double seat cabin': {
+        tagline:'Window-facing private double cabin for two.', cta:'Choose cabin',
+        includes:'What you get',
+        features:['Natural-light double cabin','Two ergonomic setups','Power &amp; ethernet','Whiteboard','Privacy assured'],
+      },
+      'Double seat cabin': {
+        tagline:'Enclosed double cabin for focused work.', cta:'Choose cabin',
+        includes:'What you get',
+        features:['Fully enclosed cabin','Two desks','Power &amp; ethernet','Locker storage'],
+      },
+      'Drafting table open seats': {
+        tagline:'Open creative drafting tables in a collaborative setting.', cta:'Choose seat',
+        includes:'What you get',
+        features:['Large drafting surface','High-speed Wi-Fi','Creative community','Power &amp; lighting'],
+      },
+      'Meeting room': {
+        tagline:'Private bookable meeting space.', cta:'Book now',
+        includes:'What you get',
+        features:['Hourly bookings','TV &amp; whiteboard','Conference setup','Tea &amp; coffee'],
+      },
+      'Lounge for Events': {
+        tagline:'Flexible lounge for events, launches &amp; gatherings.', cta:'Enquire', style:'featured', badge:'Event space',
+        includes:'Everything in Room, plus',
+        features:['Flexible event lounge','Custom layouts','Catering options','Sound &amp; lighting','Event coordination'],
+      },
+    },
+  },
+  {
+    key: 'members', label: 'Members Credit', param: null,
+    cornerLabel: 'Benefit',
+    rowSections: [[0,1,'Membership value'],[2,4,'Member benefits'],[5,8,'Exclusive access'],[9,9,'Food & drink']],
+    rowLabelMap: {
+      'Price':                                                                                                       'Membership price',
+      '1 Credit = 100 Rs':                                                                                           'Credits included',
+      'Discount on Wine':                                                                                             'Wine discount',
+      'EVENTS - Member Pricing for Events':                                                                           'Events access',
+      'GUEST PASSES':                                                                                                 'Guest passes',
+      'PREFERRED AIRBNB pricing located just one min walk away from Evergreen House':                                 'Airbnb discount',
+      'PERKS':                                                                                                        'Perks',
+      'VALIDITY':                                                                                                     'Validity',
+      'INVITE':                                                                                                       'Invite status',
+      'Food and Beverages - Love ooru Wine Menu, Blue tokai and Pizza Express - Full menu Plus Beer':                 'Food &amp; beverages',
+    },
+    footnote: 'Food and beverages billed at menu pricing plus a 20% service charge to support our partners — Blue Tokai and Pizza Express.',
+    colMeta: {
+      'LANDMARK CARD': {
+        tagline:'Entry-level membership with essential house benefits.', cta:'Get Landmark',
+        includes:'What you get',
+        features:['100 credits (₹10,000 value)','Guest passes','10% Airbnb partner rate','2 month validity','Open enrollment'],
+      },
+      'FOUNDRY CARD':  {
+        tagline:'Premium membership with exclusive events and perks.', cta:'Get Foundry', style:'highlight', badge:'Most popular',
+        includes:'Everything in Landmark, plus',
+        features:['300 credits (₹30,000 value)','10% wine discount','Private members &amp; founder events','20% Airbnb partner rate','3 month validity'],
+      },
+      'DRAFT CARD':    {
+        tagline:'Elite invite-only membership with concierge access.', cta:'Apply for Draft', style:'featured', badge:'Invite only',
+        includes:'Everything in Foundry, plus',
+        features:['500 credits (₹50,000 value)','20% wine discount','Host your own events','Secret menu items','Concierge assistance','6 month validity'],
+      },
+    },
+  },
+];
+
+// ── CSV / DATA ────────────────────────────────────────────────────
+function parseCSV(text) {
+  return text.trim().split('\n').map(line => {
+    const cols = []; let cur = '', inQ = false;
+    for (const c of line) {
+      if (c === '"') { inQ = !inQ; continue; }
+      if (c === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
+      else cur += c;
+    }
+    cols.push(cur.trim());
+    return cols;
+  });
+}
+
+function formatVal(raw) {
+  if (!raw || /^\s*$/.test(raw) || raw === '⸻') return null;
+  if (raw.includes('₹')) {
+    const m = raw.match(/₹([\d,]+)\s*(.*)/);
+    if (m) {
+      const n = parseInt(m[1].replace(/,/g,''), 10);
+      return { type:'price', amount:'₹'+n.toLocaleString('en-IN'), unit:m[2].trim() };
+    }
+  }
+  if (/^[\d,]+$/.test(raw.trim())) {
+    const n = parseInt(raw.replace(/,/g,''), 10);
+    return { type:'price', amount:'₹'+n.toLocaleString('en-IN'), unit:'' };
+  }
+  if (/^\d+%/.test(raw.trim()))           return { type:'pct',  value:raw.trim() };
+  if (raw.trim().toLowerCase() === 'yes') return { type:'yes'  };
+  if (raw.trim().toLowerCase() === 'no')  return { type:'no'   };
+  return { type:'text', value:raw.trim() };
+}
+
+function cellHTML(raw) {
+  const v = formatVal(raw);
+  if (!v) return `<td class="val na">—</td>`;
+  switch (v.type) {
+    case 'price': return `<td class="val"><span class="price">${v.amount}</span>${v.unit?`<span class="unit">${v.unit}</span>`:''}</td>`;
+    case 'pct':   return `<td class="val"><span class="pct-val">${v.value}</span></td>`;
+    case 'yes':   return `<td class="val"><span class="yes-chip"><svg viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 3 4 7 2 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Included</span></td>`;
+    case 'no':    return `<td class="val na">—</td>`;
+    case 'text':  return `<td class="val"><span class="text-val">${v.value}</span></td>`;
+  }
+}
+
+// ── RENDER PANEL ──────────────────────────────────────────────────
+function renderPanel(tab, csvRows) {
+  const rowLabels = csvRows[0].slice(1);
+  const dataRows  = csvRows.slice(1).filter(r => r[0] && r[0].trim() !== '' && r[0] !== '⸻');
+  const data = {}; const allSpaces = [];
+  dataRows.forEach(r => {
+    if (!data[r[0]]) { allSpaces.push(r[0]); data[r[0]] = []; }
+    data[r[0]] = r.slice(1);
+  });
+  // Only show spaces that have defined metadata; use colMeta order for consistent display
+  const spaces = tab.colMeta
+    ? Object.keys(tab.colMeta).filter(k => allSpaces.includes(k))
+    : allSpaces;
+
+  const colCount = spaces.length;
+  const rl = tab.rowLabelMap || {};
+  const secMap = {};
+  (tab.rowSections || []).forEach(([from, to, label]) => {
+    for (let i = from; i <= to; i++) secMap[i] = label;
+  });
+
+  const arrowSvg = `<span class="btn-arrow"><svg viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 5h6m0 0L5 2m3 3L5 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`;
+
+  if (colCount === 0) {
+    return `<p style="padding:4rem 0;text-align:center;color:var(--ink-3);font-size:.85rem">No pricing data available — check back soon.</p>`;
+  }
+
+  // ── PRICING CARDS GRID ──
+  let cards = '';
+  spaces.forEach((name, idx) => {
+    const m    = tab.colMeta[name] || { tagline:'', cta:'Book now', features:[] };
+    const vals = data[name] || [];
+    const hero = formatVal(vals[0]) || formatVal(vals[1]) || formatVal(vals[2]);
+    const cls  = m.style ? ` ${m.style}` : '';
+    const bdg  = m.badge ? `<div class="badge-pop">${m.badge}</div>` : '';
+    const features = (m.features || []).map(f => `<li>${f}</li>`).join('');
+    const includes = m.includes || 'What you get';
+    const num = String(idx + 1).padStart(2, '0');
+
+    cards += `
+      <div class="plan-card${cls}">
+        ${bdg}
+        <div class="plan-card-head">
+          <span class="plan-num">${num} / ${String(spaces.length).padStart(2,'0')}</span>
+          <div class="plan-name">${name}</div>
+          <div class="plan-tagline">${m.tagline}</div>
+        </div>
+        <div class="plan-price-block">
+          <div class="plan-price">${hero ? hero.amount : '—'}</div>
+          ${hero && hero.unit ? `<div class="plan-price-unit">${hero.unit}</div>` : ''}
+        </div>
+        <div class="plan-includes">${includes}</div>
+        <ul class="feature-list">${features}</ul>
+        <button class="plan-cta">${m.cta}${arrowSvg}</button>
+      </div>`;
+  });
+
+  // ── COMPARE TABLE ──
+  let headCells = `<th class="corner-th"><span class="corner-label">${tab.cornerLabel}</span></th>`;
+  spaces.forEach(name => {
+    const m = tab.colMeta[name] || {};
+    const meta = m.style === 'featured' ? 'Signature' : m.style === 'highlight' ? 'Most popular' : '';
+    headCells += `<th><span class="col-head-name">${name}</span>${meta?`<span class="col-head-meta">${meta}</span>`:''}</th>`;
+  });
+
+  let bodyRows = ''; let lastSec = null;
+  rowLabels.forEach((rawLabel, i) => {
+    if (!rawLabel || /^\s*$/.test(rawLabel) || rawLabel === '⸻') return;
+    const hasData = spaces.some(n => { const v = (data[n]||[])[i]; return v && v.trim() !== ''; });
+    if (!hasData) return;
+    const sec = secMap[i];
+    if (sec && sec !== lastSec) {
+      lastSec = sec;
+      bodyRows += `<tr class="section-row"><td colspan="${colCount+1}">${sec}</td></tr>`;
+    }
+    const label = rl[rawLabel] || rawLabel;
+    let cells = `<td class="row-label">${label}</td>`;
+    spaces.forEach(n => cells += cellHTML((data[n]||[])[i]||''));
+    bodyRows += `<tr class="data-row">${cells}</tr>`;
+  });
+
+  const dataColW  = 190;
+  const tableMinW = 200 + spaces.length * dataColW;
+  const colDefs   = `<col class="label-col"/>` + spaces.map(() => `<col style="min-width:${dataColW}px"/>`).join('');
+  const footnote  = tab.footnote ? `<p class="footnote">${tab.footnote}</p>` : '';
+
+  return `
+    <div class="plans-grid">${cards}</div>
+
+    <div id="compare" style="margin-bottom:1.4rem">
+      <span class="eyebrow">Compare</span>
+      <h3 class="section-title" style="font-size:clamp(1.4rem,2.4vw,2rem);margin-bottom:.5rem">Compare ${tab.label.toLowerCase()}.</h3>
+    </div>
+    <p class="compare-hint">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7h8m0 0L8 4m3 3-3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Scroll to compare all tiers
+    </p>
+    <div class="compare-wrap">
+      <table style="min-width:${tableMinW}px">
+        <colgroup>${colDefs}</colgroup>
+        <thead><tr>${headCells}</tr></thead>
+        <tbody>${bodyRows}</tbody>
+      </table>
+    </div>
+    ${footnote}`;
+}
+
+function skeletonPanel(cols = 4) {
+  const card = `
+    <div class="skeleton-card">
+      <div class="skeleton" style="width:25%;height:10px;margin:0"></div>
+      <div class="skeleton" style="width:60%;height:18px;margin:.5rem 0 0"></div>
+      <div class="skeleton" style="width:90%;height:11px;margin:0"></div>
+      <div class="skeleton" style="width:50%;height:34px;margin:1rem 0"></div>
+      <div class="skeleton" style="width:30%;height:9px;margin:0"></div>
+      <div class="skeleton" style="width:90%;height:11px;margin:0"></div>
+      <div class="skeleton" style="width:80%;height:11px;margin:0"></div>
+      <div class="skeleton" style="width:70%;height:11px;margin:0"></div>
+      <div class="skeleton" style="width:40%;height:34px;margin:auto 0 0;border-radius:999px"></div>
+    </div>`;
+  const cards = Array(cols).fill(card).join('');
+  return `<div class="plans-grid">${cards}</div>`;
+}
+
+// ── INIT ──────────────────────────────────────────────────────────
+const dot      = document.getElementById('dot');
+const statusEl = document.getElementById('status-text');
+const tabNav   = document.getElementById('tab-nav');
+const panelsEl = document.getElementById('panels');
+const footerEl = document.getElementById('footer');
+const cache    = {};
+const colCounts = { home:4, drafting:6, members:3 };
+
+TABS.forEach((tab, i) => {
+  const btn = document.createElement('button');
+  btn.className = 'seg-btn' + (i === 0 ? ' active' : '');
+  btn.textContent = tab.label;
+  btn.setAttribute('role', 'tab');
+  btn.onclick = () => switchTab(tab.key);
+  tabNav.appendChild(btn);
+
+  const panel = document.createElement('div');
+  panel.id = `panel-${tab.key}`;
+  panel.className = 'tab-panel' + (i === 0 ? ' active' : '');
+  panel.innerHTML = skeletonPanel(colCounts[tab.key] || 4);
+  panelsEl.appendChild(panel);
+});
+
+function switchTab(key) {
+  document.querySelectorAll('.seg-btn').forEach((b, i) => {
+    const isActive = TABS[i].key === key;
+    b.classList.toggle('active', isActive);
+    if (isActive) b.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+  });
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === `panel-${key}`));
+}
+
+async function fetchSheet(tab) {
+  const res = await fetch(`${BASE}&sheet=${encodeURIComponent(tab.param)}&t=${Date.now()}`, { cache:'no-store' });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return parseCSV(await res.text());
+}
+
+async function loadAll() {
+  dot.className = 'dot loading'; statusEl.textContent = 'Refreshing…';
+
+  const membersTab = TABS.find(t => t.key === 'members');
+  document.getElementById('panel-members').innerHTML = renderPanel(membersTab, MEMBERS_STATIC);
+
+  const liveTabs = TABS.filter(t => t.param !== null);
+  const results  = await Promise.allSettled(liveTabs.map(fetchSheet));
+  let anyError   = false;
+
+  results.forEach((r, i) => {
+    const tab   = liveTabs[i];
+    const panel = document.getElementById(`panel-${tab.key}`);
+    if (r.status === 'fulfilled') {
+      cache[tab.key] = r.value;
+      panel.innerHTML = renderPanel(tab, r.value);
+    } else {
+      anyError = true;
+      if (!cache[tab.key])
+        panel.innerHTML = `<p style="padding:4rem 0;text-align:center;color:var(--ink-3);font-size:.85rem">Could not load ${tab.label} — retrying in 30 s</p>`;
+    }
+  });
+
+  if (anyError) {
+    dot.className = 'dot error'; statusEl.textContent = 'Fetch error — retrying';
+  } else {
+    dot.className = 'dot live';
+    statusEl.textContent = `Live · ${new Date().toLocaleTimeString()}`;
+    footerEl.textContent = `Prices exclude all applicable taxes · last updated ${new Date().toLocaleTimeString()}`;
+  }
+}
+
+loadAll();
+setInterval(loadAll, REFRESH);
+</script>
+</body>
+</html>
